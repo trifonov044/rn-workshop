@@ -1,6 +1,8 @@
 import React, {Component} from "react";
 import {Text, View, FlatList, TextInput} from "react-native";
 
+import {ListItem} from "react-native-elements";
+
 import Api from "./Api";
 
 export default class Search extends Component {
@@ -9,6 +11,7 @@ export default class Search extends Component {
     this.state = {
       series: [],
       searchText: "",
+      seriesSaved: {},
     };
   }
 
@@ -29,6 +32,14 @@ export default class Search extends Component {
   };
 
   _handleTextChange = text => this.setState({searchText: text});
+
+  _handleCheckboxPress = item => {
+    const seriesSaved = Object.assign({}, this.state.seriesSaved);
+    seriesSaved[item.id] = !seriesSaved[item.id]
+      ? {id: item.id, seriesName: item.seriesName, episodes: {}}
+      : undefined;
+    this.setState({seriesSaved: seriesSaved});
+  };
 
   _renderHeader = () => {
     return (
@@ -51,8 +62,18 @@ export default class Search extends Component {
     );
   }
 
-  _renderItem = () => {
-    return <View/>;
+  _renderItem = ({item}) => {
+    return (
+      <ListItem
+        title={item.seriesName}
+        leftAvatar={{rounded: false, size: "large", source: {uri: Api.getSeriesImage(item.id)}}}
+        checkBox={{
+          onPress: () => this._handleCheckboxPress(item),
+          checked: !!this.state.seriesSaved[item.id],
+          checkedColor: "black",
+        }}
+      />
+    );
   };
 
   render() {
